@@ -14,7 +14,7 @@ Written in Python and powered by Selenium, Ntfy.sh and TOML, uitm-ufuture-notifi
 2. Setup Ntfy on your phone, and provide a globally unique Topic.
 2. Now on your computer or server, run: 
 ```
-pip install selenium requests tomllib
+pip install selenium requests tomllib pytz
 ```
 2. Next, run: 
 ```
@@ -46,3 +46,6 @@ Write it in [issues](https://github.com/HaiziIzzudin/uitm-ufuture-notification/i
 
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*
+
+
+###### Disclaimer: uitm-ufuture-notification is nowhere affliated or associated with Universiti Teknologi MARA, UiTM, or it's subsidiaries. This tool is just an experimental by student in their free time to see if we can improve the well being of students who uses Ufuture. This is not a direct attack to UiTM's system, it is an QOL tool for the better. Universiti Teknologi MARA, UiTM, Ufuture, Purple square and circle shape with four books and keris is Copyright (C) of Universiti Teknologi MARA (UiTM). ALL RIGHTS RESERVED.

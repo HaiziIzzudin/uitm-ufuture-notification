@@ -20,7 +20,7 @@ pip install selenium requests tomllib
 ```
 git clone https://github.com/HaiziIzzudin/uitm-ufuture-notification.git
 ```
-3. Configure `credentials.toml`. Please refer [configuration](#Configuration) for how to configure `credential.toml`
+3. Configure `credentials.toml`. Please refer [configuration](#credentialstoml-configuration) for how to configure `credential.toml`
 3. Finally, run by invoking:
 ```
 python app.py

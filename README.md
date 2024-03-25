@@ -4,9 +4,21 @@ Written in Python and powered by Selenium, Ntfy.sh and TOML, uitm-ufuture-notifi
 
 # Running this script
 
+## Preface
+This script has 2 types:
+1. `app.py`: This one iterate through recent notifications (on the top right) of Ufuture.
+2. `fetch_every_subj.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This mode requires you to agree all subject pledges before proceeding.
+
 ## How to run
 
-1. Install Python (make sure Python is accessible in PATH)
+1. Install **Python 3.12** (make sure Python is accessible in PATH)
+<details>
+  <summary><i>Why Python 3.12?</i></summary>
+
+  > 3.12.2 Added functionality of parsing toml file, under class name `tomllib`. We are leveraging that functionality to ease your experience using this script.
+
+</details>
+
 1. Install ntfy - PUT/POST to your phone | 
 [Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) | 
 [iOS](https://apps.apple.com/us/app/ntfy/id1625396347) | 
@@ -14,7 +26,7 @@ Written in Python and powered by Selenium, Ntfy.sh and TOML, uitm-ufuture-notifi
 2. Setup Ntfy on your phone, and provide a globally unique Topic.
 2. Now on your computer or server, run: 
 ```
-pip install selenium requests tomllib pytz
+pip install selenium
 ```
 2. Next, run: 
 ```
@@ -25,7 +37,11 @@ git clone https://github.com/HaiziIzzudin/uitm-ufuture-notification.git
 ```
 python app.py
 ``` 
+OR, if using the other script:
 
+```
+python fetch_every_subj.py
+``` 
 ## `credentials.toml` Configuration
 Make a new file named it `credentials.toml`. Copy and paste the configuration below:
 ```
@@ -41,8 +57,14 @@ Given that:<br>
 `your_password` is your iStudent/ Ufuture password. Remember to encase it in a double quote, failing to do so will result in script fail to run.<br>
 `your_ntfy_server` is your own Ntfy globally unique topic. This usually got initialized on your mobile phone.
 
-# Problems?
-Write it in [issues](https://github.com/HaiziIzzudin/uitm-ufuture-notification/issues)
+# Known Issues
+1. Ntfy have known issues regarding ntfy on iOS. Please refer [here](https://github.com/binwiederhier/ntfy/issues/880) for more details.
+2. Right now this script only run once, and only notify once, directly as a bunch. No timing function (10 minutes before class) is being implemented yet. *If you know how to do so, **cough, cough** can you help me pwease 🥺👉👈, feel free to do a pull request [here](https://github.com/HaiziIzzudin/uitm-ufuture-notification/pulls).*
+
+Have other problems I didn't catch during development? Write it in [issues](https://github.com/HaiziIzzudin/uitm-ufuture-notification/issues).
+
+# Changelog
+**26/3/2024**: Just learned how to use python classes and getters (yay!). I have implement it in my code. 
 
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*

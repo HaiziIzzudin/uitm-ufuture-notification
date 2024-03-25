@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 import requests
 import tomllib
 import argparse
-import subprocess
+# import subprocess
 from datetime import datetime, timedelta
 from os import name
 
@@ -36,7 +36,7 @@ def dropdownInteract():
   elements = driver.find_elements(By.XPATH, "//*[@data-toggle='dropdown']")
 
   # click the second elements
-  elements[1].click()
+  elements[0].click()
 
   # grab element next within the same hierarchy
   next_element = elements[1].find_element(By.XPATH, "following-sibling::*[1]")
@@ -54,7 +54,7 @@ def demoTime(options: str) -> str:
   twoMinAfter = now + timedelta(minutes=2)
   
   if options == 'notifyTime':
-    return oneMinAfter.strftime("%I:%M%p")
+    return oneMinAfter.strftime("%I:%M:00%p").lower()
   elif options == 'actualTime':
     return twoMinAfter.strftime("%d/%m/%Y (%I:%M %p - %I:%M %p)")
 
@@ -118,9 +118,6 @@ while i < len(noti_entries):
   details = driver.find_elements(By.XPATH, "//tbody[1]/tr[6]/td[2]") # navigating to 2nd td elements, xpath exp index start with 1
   timedate = details[0].text # set timedate to contents of 2nd td
 
-  ### COMBINE SUBJECT AND TIMEDATE ###
-  k = subject + '\n' + timedate
-
   ### GO BACK ###
   driver.back()
 
@@ -129,16 +126,17 @@ while i < len(noti_entries):
 
   ### TEST ENTRIES ###
   if args.test: 
-    k = 'ABC123, has Online Classes' + '\n' + f'{demoTime('actualTime')}'
+    subject = 'ABC123, has Online Classes'
+    timedate = f'{demoTime('actualTime')}'
   
   ### GET TIME TO NOTIFY ###
-  whenToNotify = demoTime('notifyTime')
-
+  # whenToNotify = demoTime('notifyTime')
+  # whenToNotify = '3 seconds'
 
   ### LOGGING AND PUSH NOTIFICATION ###
-  print('LOG: Notifying user of', k, 'at', whenToNotify)
-  subprocess.run(f'.' + getSeparator() + f'ntfy publish --at="{whenToNotify}" haizi_ufuture_alert "{k}"', shell=True)
-  # requests.post(data["ntfyServer"]["url"], data=f"{k}".encode(encoding='utf-8'),  headers={ "At": f"{whenToNotify}" })
+  print(f'LOG: Notifying user of {subject} at {timedate}') #, notifying at', whenToNotify
+  # requests.post(data["ntfyServer"]["url"], data=f"{timedate}".encode(encoding='utf-8'), headers={ "Title": f"{subject}", "At": f"{whenToNotify}" })
+  requests.post(data["ntfyServer"]["url"], data=f"{timedate}".encode(encoding='utf-8'), headers={ "Title": f"{subject}" })
   
   ### INCREMENT ###
   if args.test:
@@ -149,8 +147,3 @@ while i < len(noti_entries):
 
 # close
 driver.close()
-
-
-
-
-

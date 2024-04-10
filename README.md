@@ -1,6 +1,16 @@
+# Acknowledgement
+
+Thank you to these father projects that make this child project possible:
+
+1. [ntfy](https://ntfy.sh/)
+1. [selenium](https://www.selenium.dev/)
+1. [toml](https://toml.io/en/)
+
+*Go support them!*
+
 # What's this?
 
-Written in Python and powered by Selenium, Ntfy.sh and TOML, uitm-ufuture-notification is a Python script that accesses your Ufuture and if any notification about online class present, ntfy.sh will push it to your mobile device, granted you install ntfy.sh and configure same server name with your config. 
+Written in Python and powered by Selenium, Ntfy and TOML, uitm-ufuture-notification is a Python script that accesses your Ufuture and if any notification about online class and discussions present, *ntfy* will push it to your mobile device, granted you install ntfy.sh and configure same server name with your config. 
 
 # Running this script
 
@@ -8,6 +18,8 @@ Written in Python and powered by Selenium, Ntfy.sh and TOML, uitm-ufuture-notifi
 This script has 2 types:
 1. `app.py`: This one iterate through recent notifications (on the top right) of Ufuture.
 2. `fetch_every_subj.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This mode requires you to agree all subject pledges before proceeding.
+
+By default, script is running in headless (selenium webdriver headless) mode. To override this, please add flags `--headful`.
 
 ## How to run
 
@@ -35,15 +47,10 @@ git clone https://github.com/HaiziIzzudin/uitm-ufuture-notification.git
 3. Configure `credentials.toml`. Please refer [configuration](#credentialstoml-configuration) for how to configure `credential.toml`
 3. Finally, run by invoking:
 ```
-python app.py
-``` 
-OR, if using the other script:
-
-```
 python fetch_every_subj.py
 ``` 
 ## `credentials.toml` Configuration
-Make a new file named it `credentials.toml`. Copy and paste the configuration below:
+Make a new file named it `credentials.toml` in same folder with the script. Copy and paste the configuration below:
 ```
 [login]
 username = your_username
@@ -60,14 +67,17 @@ Given that:<br>
 # Known Issues
 1. Ntfy have known issues regarding ntfy on iOS. Please refer [here](https://github.com/binwiederhier/ntfy/issues/880) for more details.
 2. Right now this script only run once, and only notify once, directly as a bunch. No timing function (10 minutes before class) is being implemented yet. *If you know how to do so, **cough, cough** can you help me pwease 🥺👉👈, feel free to do a pull request [here](https://github.com/HaiziIzzudin/uitm-ufuture-notification/pulls).*
+3. **Commit on 10/4/2024 make the script unusable.** Please wait for next commit that will fix it + new functionality Coming Soon™️.
 
 Have other problems I didn't catch during development? Write it in [issues](https://github.com/HaiziIzzudin/uitm-ufuture-notification/issues).
 
 # Changelog
 **26/3/2024**: Just learned how to use python classes and getters (yay!). I have implement it in my code. 
 
+**10/4/2024**: Selenium now running headless. Added new functionality to check for i-Discuss created date. <br>**ATTENTION:** This update make breaking changes on the original code that the script is unusable. Please wait for next commit to fix the thing. 
+
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*
 
 
-###### Disclaimer: uitm-ufuture-notification is nowhere affliated or associated with Universiti Teknologi MARA, UiTM, or it's subsidiaries. This tool is just an experimental by student in their free time to see if we can improve the well being of students who uses Ufuture. This is not a direct attack to UiTM's system, it is an QOL tool for the better. Universiti Teknologi MARA, UiTM, Ufuture, Purple square and circle shape with four books and keris is Copyright (C) of Universiti Teknologi MARA (UiTM). ALL RIGHTS RESERVED.
+###### Disclaimer: uitm-ufuture-notification is nowhere affliated or associated with Universiti Teknologi MARA, UiTM, or it's subsidiaries. This tool is just an experimental by student in their free time to see if we can improve the well being of students who uses Ufuture. This is not a direct attack to UiTM's system, it is an QOL tool for the better. Universiti Teknologi MARA, UiTM, Ufuture, Purple square and circle shape with four books and keris is Copyright © of Universiti Teknologi MARA (UiTM). ALL RIGHTS RESERVED.

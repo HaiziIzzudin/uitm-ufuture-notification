@@ -17,7 +17,7 @@ Written in Python and powered by Selenium, Ntfy and TOML, uitm-ufuture-notificat
 ## Preface
 This script has 2 types:
 1. `app.py`: This one iterate through recent notifications (on the top right) of Ufuture.
-2. `fetch_every_subj.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This mode requires you to agree all subject pledges before proceeding.
+2. `main.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This mode requires you to agree all subject pledges before proceeding.
 
 By default, script is running in headless (selenium webdriver headless) mode. To override this, please add flags `--headful`.
 
@@ -47,7 +47,7 @@ git clone https://github.com/HaiziIzzudin/uitm-ufuture-notification.git
 3. Configure `credentials.toml`. Please refer [configuration](#credentialstoml-configuration) for how to configure `credential.toml`
 3. Finally, run by invoking:
 ```
-python fetch_every_subj.py
+python main.py
 ``` 
 ## `credentials.toml` Configuration
 Make a new file named it `credentials.toml` in same folder with the script. Copy and paste the configuration below:
@@ -67,14 +67,18 @@ Given that:<br>
 # Known Issues
 1. Ntfy have known issues regarding ntfy on iOS. Please refer [here](https://github.com/binwiederhier/ntfy/issues/880) for more details.
 2. Right now this script only run once, and only notify once, directly as a bunch. No timing function (10 minutes before class) is being implemented yet. *If you know how to do so, **cough, cough** can you help me pwease 🥺👉👈, feel free to do a pull request [here](https://github.com/HaiziIzzudin/uitm-ufuture-notification/pulls).*
-3. **Commit on 10/4/2024 make the script unusable.** Please wait for next commit that will fix it + new functionality Coming Soon™️.
+3. ~~**Commit on 10/4/2024 make the script unusable.** Please wait for next commit that will fix it + new functionality Coming Soon™️.~~<br>
+Latest commit has make it back working now, with full code refactor and rewrite. Expect more rollout of new code later on.
+4. New code rewrite has some issues regarding loop breaks for every subject. Will fix soon asap.
 
 Have other problems I didn't catch during development? Write it in [issues](https://github.com/HaiziIzzudin/uitm-ufuture-notification/issues).
 
 # Changelog
 **26/3/2024**: Just learned how to use python classes and getters (yay!). I have implement it in my code. 
 
-**10/4/2024**: Selenium now running headless. Added new functionality to check for i-Discuss created date. <br>**ATTENTION:** This update make breaking changes on the original code that the script is unusable. Please wait for next commit to fix the thing. 
+**10/4/2024**: Selenium now running headless. Added new functionality to check for i-Discuss created date. <br>~~**ATTENTION:** This update make breaking changes on the original code that the script is unusable. Please wait for next commit to fix the thing.~~
+
+**16/4/2024**: New code refactor/ rewrite. Expect more rollout of new code later on.
 
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*

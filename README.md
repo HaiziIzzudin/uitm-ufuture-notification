@@ -20,6 +20,8 @@ This script has 2 types:
 2. `main.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This mode requires you to agree all subject pledges before proceeding.
 
 By default, script is running in headless (selenium webdriver headless) mode. To override this, please add flags `--headful`.
+By default, script is running without having i-Discuss check functionality. To override this, please add flags `--idiscuss`.
+By default, script is running with ntfy functionality. To turn ntfy noti function off (or dry running), please add flags `--dryrun`.
 
 ## How to run
 

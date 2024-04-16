@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from tomllib import load
 import requests
+import re
 
 credential = 'credentials.toml'
 
@@ -24,6 +25,7 @@ parser.add_argument('--test', action='store_true', help='Run this script in a te
 parser.add_argument('--verbose', action='store_true', help='Run this script verbosely.')
 parser.add_argument('--headful', action='store_true', help='Run selenium in headful mode.')
 parser.add_argument('--idiscuss', action='store_true', help='Access i-Discuss.')
+parser.add_argument('--dryrun', action='store_true', help='Disables ntfy posting.')
 
 args = parser.parse_args()
 
@@ -48,7 +50,7 @@ def drivers():
   return (driver, actions) # this is a tuple
 
 
-driverl = drivers()[0]
+
 
 
 
@@ -96,6 +98,8 @@ def log(message: str):
 ### NAVIGATE TO ONLINE CLASSES ###
 ##################################
 
+(driverl, actionl) = drivers()  # driver declaration
+
 def navigate(what_to_return:str):
   
   e = driverl.find_elements(By.XPATH, "//*[@data-toggle='dropdown']")
@@ -116,21 +120,56 @@ def navigate(what_to_return:str):
 
 
 
+##################################
+### I-DISCUSS ACCESS FUNCTION ###
+##################################
+
+def idiscuss(open_or_locked:str, course_code:str):
+
+  if open_or_locked == 'open':
+    xpath = "//*[@id='openTopic']/div"
+  elif open_or_locked == 'locked':
+    xpath = "//*[@id='openTopic']/following-sibling::*[1]/div"
+
+  topics = driverl.find_elements(By.XPATH, xpath)
+  if topics:
+    for r in topics: # grab the information
+      topicsEntry = r.find_elements(By.XPATH, './div/p')
+      topicName = topicsEntry[0].text
+
+      t = topicsEntry[1].text.strip()
+      t_split = re.split(r'\n| : ', t) # using regex to split \n and :
+      
+      if t_split[9] == 'Active':
+        status = 'always Open and Active.'
+      else:
+        status = f'closed {t_split[9]}.'
+      
+      log(f'Notifying i-Discuss entry title {topicName} of course code {course_code} {status} Please do it.')
+      ntfyPOST(f'New i-Discuss from {course_code}', topicName, 'ufuture.uitm.edu.my/login', 'Ufuture', status)
+
+
+
+
+
+
+
 ##########################
 ### NTFY POST FUNCTION ###
 ##########################
 
-def ntfyPOST(title: str, link_wo_https: str, platform_name: str, date_occuring: str):
-  ntfysvr = credentials(credential, 'ntfyserver')
-  requests.post(
-    ntfysvr, 
-    headers={ 
-      "Title": title,  
-      "Actions": 
-        f'view, Open {platform_name}, https://{link_wo_https};   view, Open Ufuture, https://ufuture.uitm.edu.my'
-      }, 
-    data=f"on {date_occuring}"
-    )
+def ntfyPOST(programme_code:str, title:str, link_wo_https:str, platform_name:str, date_occuring:str):
+  if not args.dryrun:
+    ntfysvr = credentials(credential, 'ntfyserver')
+    requests.post(
+      ntfysvr, 
+      headers={ 
+        "Title": title,  
+        "Actions": 
+          f'view, Open {platform_name}, https://{link_wo_https};   view, Open Ufuture, https://ufuture.uitm.edu.my;'
+        }, 
+      data=f"Of programme code {programme_code} on {date_occuring}"
+      )
 
 
 
@@ -177,7 +216,6 @@ def ntfyPOST(title: str, link_wo_https: str, platform_name: str, date_occuring: 
 
 
 
-
 driverl.get('https://ufuture.uitm.edu.my/login')
 
 username_field = driverl.find_element(By.ID, "usernameInput")
@@ -213,7 +251,7 @@ for i in range(subjectCount):
   d = driverl.find_elements(By.XPATH, "//tbody[1]/tr")
   log(f'Number of entries: {len(d)}')
 
-  for k in range(len(d)):
+  for k in range(len(d)): # this codeblock is for every entry in the Online Class table
     k_note = d[0].find_element(By.XPATH, "//tr[1]/td[1]").text
     if k_note == 'No data available in table':
       log(f'{subjectName} has no Online Classes')
@@ -223,12 +261,44 @@ for i in range(subjectCount):
       k_date = d[k].find_element(By.XPATH, ".//td[3]").text
       k_start = d[k].find_element(By.XPATH, ".//td[4]").text
       k_link = d[k].find_element(By.XPATH, ".//td[8]/a").get_attribute('href').replace("https://", "")
-      log(f'Notifying class {k_code} on {k_date} at {k_start} in {k_link}')
-      ntfyPOST(k_code, k_link, 'Meet', f'{k_date} {k_start}')
+      log(f'Notifying class {k_code} of course code {subjectName} on {k_date} at {k_start} in {k_link}')
+      ntfyPOST(subjectName, k_code, k_link, 'Meet', f'{k_date} {k_start}')
 
   if args.idiscuss:
-    # codeblock here
-    log('idiscuss here')
+    g = driverl.find_element(By.XPATH, "//ul[@id='side-menu']/li[10]/a")
+    g.click() # click first dropdown
+
+    h = g.find_element(By.XPATH, "following-sibling::*[1]/li/a")
+    actionl.move_to_element(h).click().perform()
+    h.click() # click 2nd dropdown
+
+    p = h.find_element(By.XPATH, "following-sibling::*[1]/li[3]/a")
+    p.click() # click i-Discuss
+
+    ###--- PAGELOAD INTO I-DISCUSS ---###
+
+    academicDiscuss = driverl.find_elements(By.XPATH, "//tbody[1]/tr")
+
+    if not academicDiscuss:
+      log(f'There is no i-Discuss entry for course code {subjectName}')
+    else:
+      for q in range(len(academicDiscuss)):
+        eachAD = academicDiscuss[q].find_element(By.XPATH, "./td[1]/span[3]/a")
+        eachAD.click()
+
+        ###--- PAGELOAD INTO ACADEMIC DISCUSSIONS ---###
+
+        # open topic can have many entries, or None. Therefore...
+        idiscuss('open', subjectName)
+        # locked topic can have many entries, or None. Therefore...
+        idiscuss('locked', subjectName)
+        
+        driverl.back()
+        academicDiscuss = driverl.find_elements(By.XPATH, "//tbody[1]/tr")
+      
+      driverl.back()
+
+    driverl.back()
 
   driverl.back()
   driverl.back()

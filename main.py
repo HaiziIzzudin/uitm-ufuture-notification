@@ -7,7 +7,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from tomllib import load
-from time import sleep
 import requests
 
 credential = 'credentials.toml'
@@ -24,6 +23,7 @@ parser = argparse.ArgumentParser(description="This script access your Ufuture an
 parser.add_argument('--test', action='store_true', help='Run this script in a test environment.')
 parser.add_argument('--verbose', action='store_true', help='Run this script verbosely.')
 parser.add_argument('--headful', action='store_true', help='Run selenium in headful mode.')
+parser.add_argument('--idiscuss', action='store_true', help='Access i-Discuss.')
 
 args = parser.parse_args()
 
@@ -213,25 +213,23 @@ for i in range(subjectCount):
   d = driverl.find_elements(By.XPATH, "//tbody[1]/tr")
   log(f'Number of entries: {len(d)}')
 
-  if len(d) == 1:
+  for k in range(len(d)):
     k_note = d[0].find_element(By.XPATH, "//tr[1]/td[1]").text
     if k_note == 'No data available in table':
       log(f'{subjectName} has no Online Classes')
-      driverl.back()
-      driverl.back()
-      driverl.back()
-      subjectElementArr = navigate('initialFetch')[1]
       break
-    
-  for k in range(len(d)):
-    k_code = d[k].find_element(By.XPATH, ".//td[2]").text
-    k_date = d[k].find_element(By.XPATH, ".//td[3]").text
-    k_start = d[k].find_element(By.XPATH, ".//td[4]").text
-    k_link = d[k].find_element(By.XPATH, ".//td[8]/a").get_attribute('href').replace("https://", "")
-    log(f'Notifying class {k_code} on {k_date} at {k_start} in {k_link}')
-    ntfyPOST(k_code, k_link, 'Meet', f'{k_date} {k_start}')
+    else:
+      k_code = d[k].find_element(By.XPATH, ".//td[2]").text
+      k_date = d[k].find_element(By.XPATH, ".//td[3]").text
+      k_start = d[k].find_element(By.XPATH, ".//td[4]").text
+      k_link = d[k].find_element(By.XPATH, ".//td[8]/a").get_attribute('href').replace("https://", "")
+      log(f'Notifying class {k_code} on {k_date} at {k_start} in {k_link}')
+      ntfyPOST(k_code, k_link, 'Meet', f'{k_date} {k_start}')
 
-  driverl.back()
+  if args.idiscuss:
+    # codeblock here
+    log('idiscuss here')
+
   driverl.back()
   driverl.back()
   

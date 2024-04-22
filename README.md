@@ -82,6 +82,10 @@ Have other problems I didn't catch during development? Write it in [issues](http
 
 **16/4/2024**: New code refactor/ rewrite. Expect more rollout of new code later on.
 
+**23/4/2024**: (1) Logs now has labels either debug or info (with colours). (2) Webdriver now will NOT load images, either in headful or headless mode. This to make sure webpage loads faster on slow internet connection. (3) Added def of check time validity of online class, and if has passed current time, program will not notify.
+
+*My fren has a Macintosh operating system and has problems doing `pip install selenium`. Will examine soon, and will update instructions here for MacOS.*
+
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*
 

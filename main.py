@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import Select
 from tomllib import load
 import requests
 import re
+from datetime import datetime
 
 credential = 'credentials.toml'
 
@@ -37,14 +38,13 @@ args = parser.parse_args()
 ###################
 
 def drivers():
-  if (args.headful == True):   ### headful = true
-    driver = webdriver.Firefox()
+  options = webdriver.FirefoxOptions()
+  options.set_preference('permissions.default.image', 2)
 
-  else:   ### headless mode
-    options = webdriver.FirefoxOptions()
+  if not args.headful:   ### user wants headless mode
     options.add_argument("-headless")
-    driver = webdriver.Firefox(options=options)
   
+  driver = webdriver.Firefox(options=options)
   actions = ActionChains(driver)
 
   return (driver, actions) # this is a tuple
@@ -82,10 +82,21 @@ def credentials(credential_filename:str, return_type:str):
 ### LOGGING FUNCTION ###
 ########################
 
-def log(message: str):   
+def log(level:str, message:str):   
   print(Back.WHITE, end='')
-  print(Fore.BLACK + f' LOG: ', end='')
+  print(Fore.BLACK + f' LOG ', end='')
   print(Style.RESET_ALL, end='')
+  
+  if level == 'debug':
+    print(Back.BLUE, end='')
+    print(Fore.BLACK + f' DEBUG ', end='')
+    print(Style.RESET_ALL, end='')
+
+  elif level == 'info':
+    print(Back.CYAN, end='')
+    print(Fore.BLACK + f' INFO ', end='')
+    print(Style.RESET_ALL, end='')
+  
   print(f' {message}')
   
 
@@ -145,8 +156,36 @@ def idiscuss(open_or_locked:str, course_code:str):
       else:
         status = f'closed {t_split[9]}.'
       
-      log(f'Notifying i-Discuss entry title {topicName} of course code {course_code} {status} Please do it.')
+      log('info', f'Notifying i-Discuss entry title {topicName} of course code {course_code} {status} Please do it.')
       ntfyPOST(f'New i-Discuss from {course_code}', topicName, 'ufuture.uitm.edu.my/login', 'Ufuture', status)
+
+
+
+
+
+
+
+##############################################
+### TIME CHECK IF STILL VALID, RETURN BOOL ###
+##############################################
+
+
+def timeCheck(time_in_ddmmyy_HHMMSS_AMPM:str):
+  given_time = datetime.strptime(time_in_ddmmyy_HHMMSS_AMPM, "%d/%m/%Y %I:%M %p")
+  # `%d`: Day of the month (01 to 31)
+  # `%m`: Month (01 to 12)
+  # `%Y`: Year (4 digits)
+  # `%I`: Hour (12-hour clock) (01 to 12)
+  # `%M`: Minute (00 to 59)
+  # `%p`: AM or PM
+  current_time = datetime.now()
+
+  log('debug', f'Current time is: {current_time}')
+
+  if given_time > current_time:   return True
+  else:                           return False
+
+
 
 
 
@@ -229,14 +268,14 @@ login_button.click()
 
 subjectCount = navigate('initialFetch')[0]
 subjectElementArr = navigate('initialFetch')[1]
-log('Subject count: 10')
+log('info', 'Subject count: 10')
 
 navigate('clickDropdown')
 
 for i in range(subjectCount):
   subjectElement = subjectElementArr[i]
   subjectName = subjectElement.text
-  log(f'Now accessing {subjectName}')
+  log('debug', f'Now accessing {subjectName}')
   subjectElement.click()
 
   a = driverl.find_element(By.XPATH, "//ul[@id='side-menu']/li[9]/a")
@@ -249,20 +288,24 @@ for i in range(subjectCount):
   c_selectObj.select_by_visible_text("100")
 
   d = driverl.find_elements(By.XPATH, "//tbody[1]/tr")
-  log(f'Number of entries: {len(d)}')
+  log('debug', f'Number of entries: {len(d)}')
 
   for k in range(len(d)): # this codeblock is for every entry in the Online Class table
     k_note = d[0].find_element(By.XPATH, "//tr[1]/td[1]").text
+    
     if k_note == 'No data available in table':
-      log(f'{subjectName} has no Online Classes')
+      log('info', f'{subjectName} has no Online Classes')
       break
+    
     else:
       k_code = d[k].find_element(By.XPATH, ".//td[2]").text
       k_date = d[k].find_element(By.XPATH, ".//td[3]").text
       k_start = d[k].find_element(By.XPATH, ".//td[4]").text
       k_link = d[k].find_element(By.XPATH, ".//td[8]/a").get_attribute('href').replace("https://", "")
-      log(f'Notifying class {k_code} of course code {subjectName} on {k_date} at {k_start} in {k_link}')
-      ntfyPOST(subjectName, k_code, k_link, 'Meet', f'{k_date} {k_start}')
+      
+      if timeCheck(f'{k_date} {k_start}') == True:
+        log('info', f'Notifying class {k_code} of course code {subjectName} on {k_date} at {k_start} in {k_link}')
+        ntfyPOST(subjectName, k_code, k_link, 'Meet', f'{k_date} {k_start}')
 
   if args.idiscuss:
     g = driverl.find_element(By.XPATH, "//ul[@id='side-menu']/li[10]/a")
@@ -280,7 +323,7 @@ for i in range(subjectCount):
     academicDiscuss = driverl.find_elements(By.XPATH, "//tbody[1]/tr")
 
     if not academicDiscuss:
-      log(f'There is no i-Discuss entry for course code {subjectName}')
+      log('info', f'There is no i-Discuss entry for course code {subjectName}')
     else:
       for q in range(len(academicDiscuss)):
         eachAD = academicDiscuss[q].find_element(By.XPATH, "./td[1]/span[3]/a")

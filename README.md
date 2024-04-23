@@ -42,7 +42,7 @@ By default, script is running with ntfy functionality. To turn ntfy noti functio
 2. Setup Ntfy on your phone, and provide a globally unique Topic.
 2. Now on your computer or server, run: 
 ```
-pip install selenium
+pip install selenium colorama requests
 ```
 2. Next, run: 
 ```

@@ -17,10 +17,12 @@ Written in Python and powered by Selenium, Ntfy and TOML, uitm-ufuture-notificat
 ## Preface
 This script has 2 types:
 1. `app.py`: This one iterate through recent notifications (on the top right) of Ufuture.
-2. `main.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This mode requires you to agree all subject pledges before proceeding.
+2. `main-notifyOnce.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one only run once, and notify as a bunch. If you want a more stay alive/ ambient functionality;
+2. `main-withDB.py`: This one is the latest in development. It iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one has a database, and will loop through all the saved time in database, and if time of the online class is 2 hours left and 1 hours left, ntfy will send notification to you (***function not implemented yet***).
 
-By default, script is running in headless (selenium webdriver headless) mode. To override this, please add flags `--headful`.
-By default, script is running without having i-Discuss check functionality. To override this, please add flags `--idiscuss`.
+Please note that `main-...` script requires you to agree to subject pledge. Please do so if you haven't already.<br>
+By default, script is running in headless (selenium webdriver headless) mode. To override this, please add flags `--headful`.<br>
+By default, script is running without having i-Discuss check functionality. To override this, please add flags `--idiscuss`.<br>
 By default, script is running with ntfy functionality. To turn ntfy noti function off (or dry running), please add flags `--dryrun`.
 
 ## How to run
@@ -29,7 +31,7 @@ By default, script is running with ntfy functionality. To turn ntfy noti functio
 <details>
   <summary><i>Why Python 3.12?</i></summary>
 
-  > 3.12.2 Added functionality of parsing toml file, under class name `tomllib`. We are leveraging that functionality to ease your experience using this script.
+  > 3.12.2 Added functionality of parsing toml file, under class name `tomllib`, and updated to sqlite3. We are leveraging that functionality to ease your experience using this script.
 
 </details>
 
@@ -49,7 +51,7 @@ git clone https://github.com/HaiziIzzudin/uitm-ufuture-notification.git
 3. Configure `credentials.toml`. Please refer [configuration](#credentialstoml-configuration) for how to configure `credential.toml`
 3. Finally, run by invoking:
 ```
-python main.py
+python main-notifyOnce.py
 ``` 
 ## `credentials.toml` Configuration
 Make a new file named it `credentials.toml` in same folder with the script. Copy and paste the configuration below:
@@ -69,9 +71,9 @@ Given that:<br>
 # Known Issues
 1. Ntfy have known issues regarding ntfy on iOS. Please refer [here](https://github.com/binwiederhier/ntfy/issues/880) for more details.
 2. Right now this script only run once, and only notify once, directly as a bunch. No timing function (10 minutes before class) is being implemented yet. *If you know how to do so, **cough, cough** can you help me pwease 🥺👉👈, feel free to do a pull request [here](https://github.com/HaiziIzzudin/uitm-ufuture-notification/pulls).*
-3. ~~**Commit on 10/4/2024 make the script unusable.** Please wait for next commit that will fix it + new functionality Coming Soon™️.~~<br>
-Latest commit has make it back working now, with full code refactor and rewrite. Expect more rollout of new code later on.
-4. New code rewrite has some issues regarding loop breaks for every subject. Will fix soon asap.
+3. `main-withDB.py` is still incomplete. Please wait for this README to have documentation for the new script than you can use. If you insist and want to run it, do `python main-withDB.py`.
+4. My fren has a Macintosh operating system and has problems doing `pip install selenium`. Will examine soon, and will update instructions here for MacOS.
+
 
 Have other problems I didn't catch during development? Write it in [issues](https://github.com/HaiziIzzudin/uitm-ufuture-notification/issues).
 
@@ -82,9 +84,9 @@ Have other problems I didn't catch during development? Write it in [issues](http
 
 **16/4/2024**: New code refactor/ rewrite. Expect more rollout of new code later on.
 
-**23/4/2024**: (1) Logs now has labels either debug or info (with colours). (2) Webdriver now will NOT load images, either in headful or headless mode. This to make sure webpage loads faster on slow internet connection. (3) Added def of check time validity of online class, and if has passed current time, program will not notify.
+**23/4/2024 Pagi buta**: (1) Logs now has labels either debug or info (with colours). (2) Webdriver now will NOT load images, either in headful or headless mode. This to make sure webpage loads faster on slow internet connection. (3) Added def of check time validity of online class, and if has passed current time, program will not notify.
 
-*My fren has a Macintosh operating system and has problems doing `pip install selenium`. Will examine soon, and will update instructions here for MacOS.*
+**23/4/2024 Tghari**: (1) Script has been renamed from `main.py` to `main-notifyOnce.py`. Script has been duplicated, and added database functionality, with filename `main-withDB.py`. (2) `main-withDB.py` file has functionality of saving the course code and datetime in database, iterate contents from the database indefinitely, and nicer stdout of `DEBUG`, `INFO`, `WARN`, `PRINT`, and `INTERRUPT`.
 
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*

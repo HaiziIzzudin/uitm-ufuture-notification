@@ -334,7 +334,9 @@ for i in range(subjectCount):
         # open topic can have many entries, or None. Therefore...
         idiscuss('open', subjectName)
         # locked topic can have many entries, or None. Therefore...
-        idiscuss('locked', subjectName)
+        # idiscuss('locked', subjectName)
+        # Just realised that locked topic is locked, means how much i notify you,
+        # you cannot edit. So you kena reda jela.
         
         driverl.back()
         academicDiscuss = driverl.find_elements(By.XPATH, "//tbody[1]/tr")

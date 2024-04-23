@@ -10,7 +10,7 @@ Thank you to these father projects that make this child project possible:
 
 # What's this?
 
-Written in Python and powered by Selenium, Ntfy and TOML, uitm-ufuture-notification is a Python script that accesses your Ufuture and if any notification about online class and discussions present, *ntfy* will push it to your mobile device, granted you install ntfy.sh and configure same server name with your config. 
+Written in Python and powered by Selenium, Ntfy, SQLite DB and TOML, uitm-ufuture-notification is a Python script that accesses your Ufuture and if any notification about online class and discussions present, *ntfy* will push it to your mobile device, granted you install Ntfy and configure same server name with your config. 
 
 # Running this script
 
@@ -18,7 +18,7 @@ Written in Python and powered by Selenium, Ntfy and TOML, uitm-ufuture-notificat
 This script has 2 types:
 1. `app.py`: This one iterate through recent notifications (on the top right) of Ufuture.
 2. `main-notifyOnce.py`: This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one only run once, and notify as a bunch. If you want a more stay alive/ ambient functionality;
-2. `main-withDB.py`: This one is the latest in development. It iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one has a database, and will loop through all the saved time in database, and if time of the online class is 2 hours left and 1 hours left, ntfy will send notification to you (***function not implemented yet***).
+2. `main-withDB.py`: This one is the latest in development. It iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one has a database, and will loop through all the saved time in database, and if time of the online class is 2 hours left and 1 hours left, ntfy will send notification to you.
 
 Please note that `main-...` script requires you to agree to subject pledge. Please do so if you haven't already.<br>
 By default, script is running in headless (selenium webdriver headless) mode. To override this, please add flags `--headful`.<br>
@@ -74,8 +74,7 @@ Given that:<br>
 
 # Known Issues
 1. Ntfy have known issues regarding ntfy on iOS. Please refer [here](https://github.com/binwiederhier/ntfy/issues/880) for more details.
-2. Right now this script only run once, and only notify once, directly as a bunch. No timing function (10 minutes before class) is being implemented yet. *If you know how to do so, **cough, cough** can you help me pwease 🥺👉👈, feel free to do a pull request [here](https://github.com/HaiziIzzudin/uitm-ufuture-notification/pulls).*
-3. `main-withDB.py` is still incomplete. Please wait for this README to have documentation for the new script than you can use. If you insist and want to run it, do `python main-withDB.py`.
+3. `main-withDB.py` has some issues where if you interrupt the program, program will not save state. Means if notification has been pushed, if script runs again, notification will get pushed again.
 4. My fren has a Macintosh operating system and has problems doing `pip install selenium`. Will examine soon, and will update instructions here for MacOS.
 
 
@@ -93,6 +92,8 @@ Have other problems I didn't catch during development? Write it in [issues](http
 **23/4/2024 Tghari**: (1) Script has been renamed from `main.py` to `main-notifyOnce.py`. Script has been duplicated, and added database functionality, with filename `main-withDB.py`. (2) `main-withDB.py` file has functionality of saving the course code and datetime in database, iterate contents from the database indefinitely, and nicer stdout of `DEBUG`, `INFO`, `WARN`, `PRINT`, and `INTERRUPT`.
 
 **23/4/2024 Petang**: Script now has a loop functionality that checks if there is 1 hour left before class, and will notify user.
+
+**24/4/2024 Pagi Buta**: Script loop has improved more, where ufuture rechecks can be made for every 1 minute interval. You can change this in the script (`line 20`).
 
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*

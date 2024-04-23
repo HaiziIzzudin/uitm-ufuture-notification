@@ -53,6 +53,10 @@ git clone https://github.com/HaiziIzzudin/uitm-ufuture-notification.git
 ```
 python main-notifyOnce.py
 ``` 
+OR
+```
+python main-withDB.py
+```
 ## `credentials.toml` Configuration
 Make a new file named it `credentials.toml` in same folder with the script. Copy and paste the configuration below:
 ```
@@ -87,6 +91,8 @@ Have other problems I didn't catch during development? Write it in [issues](http
 **23/4/2024 Pagi buta**: (1) Logs now has labels either debug or info (with colours). (2) Webdriver now will NOT load images, either in headful or headless mode. This to make sure webpage loads faster on slow internet connection. (3) Added def of check time validity of online class, and if has passed current time, program will not notify.
 
 **23/4/2024 Tghari**: (1) Script has been renamed from `main.py` to `main-notifyOnce.py`. Script has been duplicated, and added database functionality, with filename `main-withDB.py`. (2) `main-withDB.py` file has functionality of saving the course code and datetime in database, iterate contents from the database indefinitely, and nicer stdout of `DEBUG`, `INFO`, `WARN`, `PRINT`, and `INTERRUPT`.
+
+**23/4/2024 Petang**: Script now has a loop functionality that checks if there is 1 hour left before class, and will notify user.
 
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)
 #### *Thank you from the bottom of my heart ❤️*

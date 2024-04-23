@@ -8,3 +8,7 @@ test.py
 
 # [STILL ALPHA] Powered by Selenium and Ntfy.sh, this script access your Ufuture and if any notification present, ntfy.sh will push it to your mobile device, granted you install ntfy.sh and configure same server name with your config. 
 # python .\main.py --headful --idiscuss --dryrun
+
+# python .\main-withDB.py --headful --dryrun --debug
+
+# python .\main-withDB.py --headful --dryrun --test

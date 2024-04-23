@@ -18,9 +18,6 @@ import os
 credential = 'credentials.toml'
 db_name = 'test.db'
 
-
-
-
 ########################
 ### SYSTEM ARGUMENTS ###
 ########################
@@ -35,7 +32,6 @@ parser.add_argument('--dryrun', action='store_true', help='Disables ntfy posting
 parser.add_argument('--donotdeletedb', action='store_true', help="Don't delete db file after keyboardInterrupt. Please remove the db file before running the script again.")
 
 args = parser.parse_args()
-
 
 
 
@@ -57,11 +53,6 @@ def drivers():
 
 
 
-
-
-
-
-
 ###############################################
 ### LOAD AND RETURN CREDENTIALS INFORMATION ###
 ###############################################
@@ -78,10 +69,6 @@ def credentials(credential_filename:str, return_type:str):
   elif return_type == 'ntfyserver':
     return data["ntfyServer"]["url"]
   
-
-
-
-
 
 
 ########################
@@ -121,12 +108,13 @@ def log(level:str, message:str):
     print(Fore.BLACK + f' WARN ', end='')
     print(Style.RESET_ALL, end='')
   
+  elif level == 'done':
+    print(Back.GREEN, end='')
+    print(Fore.BLACK + f' DONE ', end='')
+    print(Style.RESET_ALL, end='')
+  
   print(f' {message}')
   
-
-
-
-
 
 
 ##################################
@@ -149,9 +137,6 @@ def navigate(what_to_return:str):
   
   elif what_to_return == 'clickDropdown':
     dropdown.click() 
-
-
-
 
 
 
@@ -185,35 +170,17 @@ def idiscuss(open_or_locked:str, course_code:str):
 
 
 
-
-
-
-
 ##############################################
 ### TIME CHECK IF STILL VALID, RETURN BOOL ###
 ##############################################
 
-
-def timeCheck(time_in_ddmmyy_HHMMSS_AMPM:str):
-  given_time = datetime.strptime(time_in_ddmmyy_HHMMSS_AMPM, "%d/%m/%Y %I:%M %p")
-  # `%d`: Day of the month (01 to 31)
-  # `%m`: Month (01 to 12)
-  # `%Y`: Year (4 digits)
-  # `%I`: Hour (12-hour clock) (01 to 12)
-  # `%M`: Minute (00 to 59)
-  # `%p`: AM or PM
+def timeCheck(time1:str):
   current_time = datetime.now()
 
   log('debug', f'Current time is: {current_time}')
 
-  if given_time > current_time:   return True
-  else:                           return False
-
-
-
-
-
-
+  if time1 > current_time:   return True
+  else:                      return False
 
 
 
@@ -227,15 +194,12 @@ def ntfyPOST(course_code:str, link_wo_https:str, platform_name:str, date_occurin
     requests.post(
       ntfysvr, 
       headers={ 
-        "Title": course_code,  
+        "Title": f'Class {course_code} in 1 Hour ⏱️'.encode(encoding='utf-8'),
         "Actions": 
-          f'view, Open {platform_name}, https://{link_wo_https};   view, Open Ufuture, https://ufuture.uitm.edu.my;'
+          f'view, Open {platform_name}, {link_wo_https};   view, Open Ufuture, https://ufuture.uitm.edu.my/login;'
         }, 
-      data=f"on {date_occuring}"
+      data=f"on {date_occuring}. Mandi dan bersiap sekarang 🚿".encode(encoding='utf-8')
       )
-
-
-
 
 
 
@@ -245,7 +209,7 @@ def ntfyPOST(course_code:str, link_wo_https:str, platform_name:str, date_occurin
 
 def writeToDB(subject_code:str, date_time:str, link:str):
   log('info', f'Saving class {subject_code} on {date_time} in {link} into database.')
-  cursor.execute("INSERT INTO onlineClass (subjectCode, datetime, link) VALUES (?,?,?)", (subject_code, date_time, link))
+  cursor.execute("INSERT INTO onlineClass (subjectCode, dateNtime, link, hasNotified) VALUES (?,?,?,?)", (subject_code, date_time, link, 0))
 
 
 
@@ -284,7 +248,8 @@ def writeToDB(subject_code:str, date_time:str, link:str):
 
 conn = sqlite3.connect(db_name) # os.path.exists() is not necessary. Sqlite has that built-in.
 cursor = conn.cursor() # important for actual interaction with the db
-cursor.execute('CREATE TABLE IF NOT EXISTS onlineClass (id INTEGER PRIMARY KEY, subjectCode TEXT, datetime TEXT, link TEXT)')
+cursor.execute('''CREATE TABLE IF NOT EXISTS onlineClass
+(id INTEGER PRIMARY KEY, subjectCode TEXT, dateNtime TEXT, link TEXT, hasNotified INTEGER)''')
 
 ###################################
 ### NOW RUN ALL THE SHENANIGANS ###
@@ -333,13 +298,17 @@ for i in range(subjectCount):
       break
     
     else:
-      # k_code = d[k].find_element(By.XPATH, ".//td[2]").text
       k_date = d[k].find_element(By.XPATH, ".//td[3]").text
       k_start = d[k].find_element(By.XPATH, ".//td[4]").text
-      k_link = d[k].find_element(By.XPATH, ".//td[8]/a").get_attribute('href').replace("https://", "")
+      k_link = d[k].find_element(By.XPATH, ".//td[8]/a").get_attribute('href')
       
-      if timeCheck(f'{k_date} {k_start}'):
-        writeToDB(subjectName, f'{k_date} {k_start}', k_link) ### DB WRITE CODE HERE
+      time1 = datetime.strptime(f'{k_date} {k_start}', "%d/%m/%Y %I:%M %p")
+
+      if timeCheck(time1):
+        writeToDB(subjectName, time1 - timedelta(hours=1), k_link) ### 1 HOUR BEFORE CLASS
+        # writeToDB(subjectName, time1, k_link) ### DB WRITE CODE HERE
+
+
 
   if args.idiscuss:
     g = driverl.find_element(By.XPATH, "//ul[@id='side-menu']/li[10]/a")
@@ -381,12 +350,21 @@ for i in range(subjectCount):
   
   subjectElementArr = navigate('initialFetch')[1]
 
-
-
-
-
-
 driverl.close()
+
+
+
+########################
+### TEST ENVIRONMENT ###
+########################
+
+if args.test:
+  timecurrent = datetime.now()
+  timeartificial = timecurrent - timedelta(minutes=1)
+
+  writeToDB('XYZ123', datetime.strftime(timeartificial, '%Y-%m-%d %H:%M:%S'), 'https://www.google.com')
+
+
 
 conn.commit() # Commit the database changes
 
@@ -414,13 +392,16 @@ try:
       sleep(0.2)
       log('debug', row)
       
-      time1 = datetime.strptime(row[2], "%d/%m/%Y %I:%M %p")
+      time2 = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
       timecurrent = datetime.now()
 
-      if time1 < timecurrent + timedelta(hours=2):
-        log('info', f"Class {row[1]} 2 hours left. Gosok baju sekarang.")
-      elif time1 < timecurrent + timedelta(hours=1):
+      if (time2 < timecurrent) and (row[4] == 0):
         log('info', f"Class {row[1]} 1 hours left. Pergi mandi sekarang.")
+        ntfyPOST(row[1], row[3], 'Meet', time2.strftime("%d/%m/%Y %I:%M %p")) ### ntfy notification function
+        cursor.execute("UPDATE onlineClass SET hasNotified = 1 WHERE id = ?", (row[0],)) # comma indicates that it is tuple without that sqlite will error
+        conn.commit()
+      elif (row[4] == 1):
+        log('done', f"SUDAH NOTIFY. {row[1]} on {row[2]}")
       else:
         log('info', f"Lama lagih. {row[1]} on {row[2]}")
 

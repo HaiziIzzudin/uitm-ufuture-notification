@@ -17,7 +17,7 @@ import os
 
 credential = 'credentials.toml'
 db_name = 'test.db'
-interval_in_min:str = 1
+interval_in_min:str = 3
 
 ########################
 ### SYSTEM ARGUMENTS ###

@@ -48,9 +48,13 @@ def drivers():
     options.add_argument("-headless")
 
   if os.path.exists(os.path.expanduser("~") + '/.termux'):
+    log('print', 'Termux detected, adding service variable...')
     service = webdriver.FirefoxService(executable_path="/data/data/com.termux/files/usr/bin/geckodriver")
+    driver = webdriver.Firefox(service=service, options=options)
+  else:
+    log('print', 'Normal environment detected, skipping service variable...')
+    driver = webdriver.Firefox(options=options)
 
-  driver = webdriver.Firefox(service=service, options=options)
   actions = ActionChains(driver)
 
   return (driver, actions) # this is a tuple

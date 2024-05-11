@@ -1,11 +1,7 @@
 credentials.toml
 logs.log
-pseudocode.pseudo
-sqlite-test
 test.db
 test.db-journal
-test.py
-notes.txt
 
 # [STILL ALPHA] Powered by Selenium and Ntfy.sh, this script access your Ufuture and if any notification present, ntfy.sh will push it to your mobile device, granted you install ntfy.sh and configure same server name with your config. 
 # python .\main.py --headful --idiscuss --dryrun

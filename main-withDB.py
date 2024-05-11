@@ -46,8 +46,11 @@ def drivers():
 
   if not args.headful:   ### user wants headless mode
     options.add_argument("-headless")
-  
-  driver = webdriver.Firefox(options=options)
+
+  if os.path.exists(os.path.expanduser("~") + '/.termux'):
+    service = webdriver.FirefoxService(executable_path="/data/data/com.termux/files/usr/bin/geckodriver")
+
+  driver = webdriver.Firefox(service=service, options=options)
   actions = ActionChains(driver)
 
   return (driver, actions) # this is a tuple

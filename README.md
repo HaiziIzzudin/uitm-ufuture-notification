@@ -23,7 +23,7 @@ Written in Python and powered by Selenium, Ntfy, SQLite DB and TOML, uitm-ufutur
 This script has 3 types:
 1. `app.py`: **DEPRECATED** - This one iterate through recent notifications (on the top right) of Ufuture.
 2. `main-notifyOnce.py`: **DEPRECATED** - This one iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one only run once, and notify as a bunch. If you want a more stay alive/ ambient functionality;
-2. `main-withDB.py`: This one is the latest in development. It iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one has a database, and will loop through all the saved time in database, and if time of the online class is 1 hours left, ntfy will send notification to you.
+2. `main-withDB.py`: This one is the latest in development. It iterate through every subject in the myCourses dropdown (on the top right) of Ufuture. This one has a database, and will loop through all the saved time in database. If time of the online class is 1 hours left, and if class time has arrived, ntfy will notify you to get ready, or tick your attendance in Ufuture.
 
 Please note that `main-...` script requires you to agree to subject pledge. Please do so if you haven't already.<br>
 By default, script is running in headless (selenium webdriver headless) mode. To override this, please add flags `--headful`.<br>
@@ -47,7 +47,7 @@ By default, script is running with ntfy functionality. To turn ntfy noti functio
 2. Setup Ntfy on your phone, and provide a globally unique Topic.
 2. Now on your computer or server, run: 
 ```
-pip install selenium colorama requests
+pip install selenium colorama requests pandas
 ```
 2. Next, run: 
 ```
@@ -60,19 +60,62 @@ python main-withDB.py
 ```
 ## `credentials.toml` Configuration
 Make a new file named it `credentials.toml` in same folder with the script. Copy and paste the configuration below:
-```
+
+
+```toml
+# YOUR UFUTURE CREDENTIALS
+
 [login]
 username = your_username
 password = "your_password"
 
 [ntfyServer]
-url = "https://ntfy.sh/your_ntfy_server"
+url = "https://ntfy.sh/your_ntfy_topic"
+
+
+# PERSISTENT TIMETABLE
+
+[timetable.monday]
+classcode1 = ['time', 'place']
+classcode2 = ['time', 'place']
+classcode3 = ['time', 'place']
+
+[timetable.tuesday]
+classcode4 = ['time', 'place']
+
+[timetable.wednesday]
+classcode5 = ['time', 'place']
+classcode6 = ['time', 'place']
+
+[timetable.thursday]
+
+[timetable.friday]
+classcode7 = ['time', 'place']
+classcode8 = ['time', 'place']
+
+
+# OTHER INFORMATION REQUIRED
+[academicInfo]
+tarikh_tamat_semester_semasa = YYYY-MM-DD 
+# Example: 2024-07-24
 ```
+
+
 Given that:<br>
 `your_username` is your username. For UiTM students, this will be your Student ID.<br>
 `your_password` is your iStudent/ Ufuture password. Remember to encase it in a double quote, failing to do so will result in script fail to run.<br>
-`your_ntfy_server` is your own Ntfy globally unique topic. This usually got initialized on your mobile phone.
+`your_ntfy_topic` is your own Ntfy globally unique topic. This usually got initialized on your mobile phone.<br>
+`classcode` is your Course Code. Example: *'IRA543'*<br>
+`time` is time of that class starts. Example: *'12:00PM'*<br>
+`place` is place of the class will be held. You can put free text here. Example: *'Bilik Seminar'*
+`YYYY-MM-DD` is your date of finish your current semester. Example: *2024-07-24*
 
+***ATTENTION:*** **Any place that has single quote '...' MUST be followed. In `time` and `YYYY-MM-DD` format DO NOT add any extra characters or spaces.**
+
+*What if I have multiple classes or no classes for that day?*<br>
+Do not fret. The `classcode` entry can be added or removed to your liking. Any `[timetable]` entry can be empty.
+
+*Still can't catch it?* You may want to look my example [here](https://github.com/HaiziIzzudin/uitm-ufuture-notification/blob/main/credentials-example.toml).
 
 
 
@@ -102,6 +145,8 @@ Have other problems I didn't catch during development? Write it in [issues](http
   **24/4/2024 Pagi Buta**: Script loop has improved more, where ufuture rechecks can be made for every 3 minute interval. You can change this in the script (`line 20`).
 
   **11/5/2024**: Added QOL improvement where script has been tested to run on Python 3.11.0, and adapted the project to run on Android (a.k.a. self-hosted method).
+  
+  **13/5/2024**: Added functionality to notify user if class time has arrived, program will notify user to tick attendance in Ufuture.
 </details>
 
 # Support my software development on [Ko-Fi](https://ko-fi.com/haiziizzudin)

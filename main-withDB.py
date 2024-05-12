@@ -11,9 +11,10 @@ import requests
 import re
 from datetime import datetime
 from datetime import timedelta
-import sqlite3
+from sqlite3 import connect
 from time import sleep
 import os
+import pandas as pd
 
 credential = 'credentials.toml'
 db_name = 'test.db'
@@ -76,6 +77,10 @@ def credentials(credential_filename:str, return_type:str):
     return data["login"]["password"]
   elif return_type == 'ntfyserver':
     return data["ntfyServer"]["url"]
+  elif return_type == 'persistent':
+    return data["timetable"]
+  elif return_type == 'habisSemester':
+    return data["academicInfo"]["tarikh_tamat_semester_semasa"]
   
 
 
@@ -180,17 +185,23 @@ def timeCheck(time1:str):
 ### NTFY POST FUNCTION ###
 ##########################
 
-def ntfyPOST(course_code:str, link_wo_https:str, platform_name:str, date_occuring:str):
+def ntfyPOST(course_code:str, https_link:str, platform_name:str, date_occuring:str, condition:str):
+  
   if not args.dryrun:
     ntfysvr = credentials(credential, 'ntfyserver')
+    
+    if condition == '1hour':
+      title = f'Class {course_code} in 1 Hour ⏱️'
+      action = f'view, Open {platform_name}, {https_link};   view, Open Ufuture, https://ufuture.uitm.edu.my/login;'
+      datas = f"on {date_occuring}. Mandi dan bersiap sekarang 🚿"
+    
+    elif condition == 'now':
+      title = f'Now attending class {course_code}'
+      action = f'view, Open Ufuture, https://ufuture.uitm.edu.my/login;'
+      datas = f"Don't forget to tick your attendance in Ufuture ✅"
+    
     requests.post(
-      ntfysvr, 
-      headers={ 
-        "Title": f'Class {course_code} in 1 Hour ⏱️'.encode(encoding='utf-8'),
-        "Actions": 
-          f'view, Open {platform_name}, {link_wo_https};   view, Open Ufuture, https://ufuture.uitm.edu.my/login;'
-        }, 
-      data=f"on {date_occuring}. Mandi dan bersiap sekarang 🚿".encode(encoding='utf-8')
+      ntfysvr, headers={   "Title": title.encode(encoding='utf-8'),   "Actions": action   },   data=datas.encode(encoding='utf-8')
       )
 
 
@@ -199,9 +210,9 @@ def ntfyPOST(course_code:str, link_wo_https:str, platform_name:str, date_occurin
 ### DB WRITING DEF ###
 ######################
 
-def writeToDB(subject_code:str, date_time:str, link:str):
+def writeToDB(subject_code:str, date_time:str, link:str, condition:str):
   log('info', f'Saving class {subject_code} on {date_time} in {link} into database.')
-  cursor.execute("INSERT INTO onlineClass (subjectCode, dateNtime, link, hasNotified) VALUES (?,?,?,?)", (subject_code, date_time, link, 0))
+  cursor.execute("INSERT INTO onlineClass (subjectCode, dateNtime, link, condition, hasNotified) VALUES (?,?,?,?,?)", (subject_code, date_time, link, condition, 0))
 
 
 
@@ -211,6 +222,39 @@ def writeToDB(subject_code:str, date_time:str, link:str):
 
 def timenow():
   return datetime.now()
+
+
+
+
+######################
+### DEF PERSISTENT ###
+######################
+
+def persistentCheck():
+  
+  days = credentials(credential, 'persistent')
+  endSemesterDate = credentials(credential, 'habisSemester')
+
+  for each in days:
+    kelasdict = days[each]
+    for each2 in kelasdict:
+      log('info', f"You have class {each2} on {each}, {kelasdict[each2][0]} at {kelasdict[each2][1]}.")
+
+      # Generate a date range for the next 7 weeks
+      date_range = pd.date_range(start=pd.to_datetime('today'), end=pd.to_datetime(endSemesterDate), freq='D')
+
+      # Filter out the dates that are Mondays
+      for x in date_range[(date_range.day_name().str.lower() == each)]:
+        date = x.strftime('%Y-%m-%d')
+        time = kelasdict[each2][0]
+
+        dateNtime = datetime.strptime(f'{date} {time}', "%Y-%m-%d %I:%M%p")
+
+        log('debug', dateNtime)
+
+        writeToDB(each2, dateNtime, kelasdict[each2][1])
+
+      # TODO: Return statement for checking on persistent and online class.
 
 
 
@@ -264,10 +308,10 @@ try:
   
   while True: ### NOW RUN ALL THE SHENANIGANS ###
     
-    conn = sqlite3.connect(db_name) # os.path.exists() is not necessary. Sqlite has that built-in.
+    conn = connect(db_name) # os.path.exists() is not necessary. Sqlite has that built-in.
     cursor = conn.cursor() # important for actual interaction with the db
     cursor.execute('''CREATE TABLE IF NOT EXISTS onlineClass
-    (id INTEGER PRIMARY KEY, subjectCode TEXT, dateNtime TEXT, link TEXT, hasNotified INTEGER)''')
+    (id INTEGER PRIMARY KEY, subjectCode TEXT, dateNtime TEXT, link TEXT, condition TEXT, hasNotified INTEGER)''')
 
     driverl.get('https://ufuture.uitm.edu.my/courses/list_course')
     
@@ -310,8 +354,8 @@ try:
           time1 = datetime.strptime(f'{k_date} {k_start}', "%d/%m/%Y %I:%M %p")
 
           if timeCheck(time1):
-            writeToDB(subjectName, time1 - timedelta(hours=1), k_link) ### 1 HOUR BEFORE CLASS
-            # writeToDB(subjectName, time1, k_link) ### DB WRITE CODE HERE
+            writeToDB(subjectName, time1 - timedelta(hours=1), k_link, '1hour') ### 1 HOUR BEFORE CLASS
+            writeToDB(subjectName, time1,                      k_link, 'now') ### CLASS RUNNING, REMIND USER TO TICK ATTENDANCE
 
 
 
@@ -366,13 +410,24 @@ try:
     timecurrent = datetime.now()
     
     if args.test:
-      timeartificial = timecurrent - timedelta(minutes=1)
-      writeToDB('XYZ123', datetime.strftime(timeartificial, '%Y-%m-%d %H:%M:%S'), 'https://www.google.com')
+      timebackward = timecurrent - timedelta(minutes=1)
+      timeforward = timecurrent + timedelta(minutes=1)
+      writeToDB('XYZ123', datetime.strftime(timebackward, '%Y-%m-%d %H:%M:%S'), 'https://www.google.com', '1hour')
+      writeToDB('XYZ123', datetime.strftime(timeforward, '%Y-%m-%d %H:%M:%S'), 'https://www.google.com', 'now')
 
     conn.commit() # Commit the database changes
 
-    ### GET 10 MIN FORWARD TIME ###
-    time10min = timecurrent + timedelta(minutes=interval_in_min)
+
+
+
+
+
+    ##################################################
+    ### FETCH DATA FROM DB AND BEGIN CHECKING LOOP ###
+    ##################################################
+    
+    ### FETCH interval_in_min ###
+    timeInterval = timecurrent + timedelta(minutes=interval_in_min)
 
     check = True
     while check:
@@ -385,21 +440,32 @@ try:
         sleep(0.2)
         log('debug', row)
         
-        time2 = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
+        ids = row[0]
+        courseCode = row[1]
+        timestr = row[2]
+        link = row[3]
+        condition = row[4]
+        notiStatus = row[5]
+        
+        timeobj = datetime.strptime(timestr, '%Y-%m-%d %H:%M:%S')
         timecurrent = datetime.now()
 
-        if (time2 < timecurrent) and (row[4] == 0):
-          log('info', f"Class {row[1]} 1 hours left. Pergi mandi sekarang.")
-          ntfyPOST(row[1], row[3], 'Meet', time2.strftime("%d/%m/%Y %I:%M %p")) ### ntfy notification function
-          cursor.execute(f"UPDATE onlineClass SET hasNotified = 1 WHERE id = ?", (row[0],)) # comma indicates that it is tuple, without that sqlite will error.
+        if (timeobj < timecurrent) and (notiStatus == 0):
+          
+          log('info', f"Class {courseCode} {condition}")
+          ntfyPOST(courseCode, link, 'Meet', timeobj.strftime("%d/%m/%Y %I:%M %p"), condition) ### ntfy notification function
+          cursor.execute(f"UPDATE onlineClass SET hasNotified = 1 WHERE id = ?", (ids,)) # comma indicates that it is tuple, without that sqlite will error.
           conn.commit()
-        elif (row[4] == 1):
-          log('done', f"SUDAH NOTIFY. {row[1]} on {row[2]}")
+        
+        elif (notiStatus == 1):
+          log('done', f"SUDAH NOTIFY. {courseCode} on {timestr}")
+        
         else:
-          log('info', f"Lama lagih. {row[1]} on {row[2]}")
+          log('info', f"Lama lagih. {courseCode} on {timestr}")
 
-        log('debug', f'Time left before recheck: {time10min - timecurrent}')
-        if (timecurrent > time10min):   
+        log('debug', f'Time left before recheck: {timeInterval - timecurrent}')
+        
+        if (timecurrent > timeInterval):   
           log('print', 'Timeout has finished. Running ufuture check again...')
           conn.close() ### Close the database first!
           if os.path.exists(db_name):   os.remove(db_name)   # If test.db exists, delete it

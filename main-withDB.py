@@ -16,9 +16,23 @@ from time import sleep
 import os
 import pandas as pd
 
+
+
+
+### CHANGEABLE BEFORE RUN ###
 credential = 'credentials.toml'
 db_name = 'test.db'
 interval_in_min:str = 3
+
+
+
+
+### CONST DO NOT CHANGE ###
+timecurrent:datetime = datetime.now()
+### CONST DO NOT CHANGE ###
+
+
+
 
 ########################
 ### SYSTEM ARGUMENTS ###
@@ -167,18 +181,6 @@ def idiscuss(open_or_locked:str, course_code:str):
 
 
 
-##############################################
-### TIME CHECK IF STILL VALID, RETURN BOOL ###
-##############################################
-
-def timeCheck(time1:str):
-  current_time = datetime.now()
-
-  log('debug', f'Current time is: {current_time}')
-
-  if time1 > current_time:   return True
-  else:                      return False
-
 
 
 ##########################
@@ -206,6 +208,9 @@ def ntfyPOST(course_code:str, https_link:str, platform_name:str, date_occuring:s
 
 
 
+
+
+
 ######################
 ### DB WRITING DEF ###
 ######################
@@ -216,12 +221,6 @@ def writeToDB(subject_code:str, date_time:str, link:str, condition:str):
 
 
 
-##########################
-### DEF FETCH TIME NOW ###
-##########################
-
-def timenow():
-  return datetime.now()
 
 
 
@@ -327,10 +326,16 @@ try:
       log('debug', f'Now accessing {subjectName}')
       subjectElement.click()
 
+
+      ###--- PAGELOAD INTO SUBJECT PAGE ---###
+
       a = driverl.find_element(By.XPATH, "//ul[@id='side-menu']/li[9]/a")
       a.click()
       b = a.find_element(By.XPATH, "following-sibling::*[1]")
       b.click()
+
+
+      ###--- PAGELOAD INTO ONLINE CLASS PAGE ---###
 
       c = driverl.find_element(By.NAME, "onlineclassTbl_length")
       c_selectObj = Select(c)
@@ -353,9 +358,11 @@ try:
           
           time1 = datetime.strptime(f'{k_date} {k_start}', "%d/%m/%Y %I:%M %p")
 
-          if timeCheck(time1):
+          if timecurrent < (time1 - timedelta(hours=1)):
             writeToDB(subjectName, time1 - timedelta(hours=1), k_link, '1hour') ### 1 HOUR BEFORE CLASS
-            writeToDB(subjectName, time1,                      k_link, 'now') ### CLASS RUNNING, REMIND USER TO TICK ATTENDANCE
+            
+          if timecurrent < time1:
+            writeToDB(subjectName, time1, k_link, 'now') ### CLASS RUNNING, REMIND USER TO TICK ATTENDANCE
 
 
 
@@ -369,6 +376,7 @@ try:
 
         p = h.find_element(By.XPATH, "following-sibling::*[1]/li[3]/a")
         p.click() # click i-Discuss
+
 
         ###--- PAGELOAD INTO I-DISCUSS ---###
 
@@ -388,8 +396,11 @@ try:
             # Locked topic is locked. So you kena reda jela.
             
             driverl.back()
+            ###--- PAGELOAD BACK TO I-DISCUSS ---###
+
             academicDiscuss = driverl.find_elements(By.XPATH, "//tbody[1]/tr")
           
+          ###--- PAGELOAD BACK TO I-DISCUSS ---###
           driverl.back()
 
         driverl.back()
@@ -426,7 +437,7 @@ try:
     ### FETCH DATA FROM DB AND BEGIN CHECKING LOOP ###
     ##################################################
     
-    ### FETCH interval_in_min ###
+    ### CONVERTING INTERVAL_IN_MIN TO DATETIME OBJ ###
     timeInterval = timecurrent + timedelta(minutes=interval_in_min)
 
     check = True

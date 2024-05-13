@@ -14,7 +14,6 @@ from datetime import timedelta
 from sqlite3 import connect
 from time import sleep
 import os
-import pandas as pd
 
 
 
@@ -229,31 +228,31 @@ def writeToDB(subject_code:str, date_time:str, link:str, condition:str):
 ### DEF PERSISTENT ###
 ######################
 
-def persistentCheck():
+# def persistentCheck():
   
-  days = credentials(credential, 'persistent')
-  endSemesterDate = credentials(credential, 'habisSemester')
+#   days = credentials(credential, 'persistent')
+#   endSemesterDate = credentials(credential, 'habisSemester')
 
-  for each in days:
-    kelasdict = days[each]
-    for each2 in kelasdict:
-      log('info', f"You have class {each2} on {each}, {kelasdict[each2][0]} at {kelasdict[each2][1]}.")
+#   for each in days:
+#     kelasdict = days[each]
+#     for each2 in kelasdict:
+#       log('info', f"You have class {each2} on {each}, {kelasdict[each2][0]} at {kelasdict[each2][1]}.")
 
-      # Generate a date range for the next 7 weeks
-      date_range = pd.date_range(start=pd.to_datetime('today'), end=pd.to_datetime(endSemesterDate), freq='D')
+#       # Generate a date range for the next 7 weeks
+#       date_range = pd.date_range(start=pd.to_datetime('today'), end=pd.to_datetime(endSemesterDate), freq='D')
 
-      # Filter out the dates that are Mondays
-      for x in date_range[(date_range.day_name().str.lower() == each)]:
-        date = x.strftime('%Y-%m-%d')
-        time = kelasdict[each2][0]
+#       # Filter out the dates that are Mondays
+#       for x in date_range[(date_range.day_name().str.lower() == each)]:
+#         date = x.strftime('%Y-%m-%d')
+#         time = kelasdict[each2][0]
 
-        dateNtime = datetime.strptime(f'{date} {time}', "%Y-%m-%d %I:%M%p")
+#         dateNtime = datetime.strptime(f'{date} {time}', "%Y-%m-%d %I:%M%p")
 
-        log('debug', dateNtime)
+#         log('debug', dateNtime)
 
-        writeToDB(each2, dateNtime, kelasdict[each2][1])
+#         writeToDB(each2, dateNtime, kelasdict[each2][1])
 
-      # TODO: Return statement for checking on persistent and online class.
+#       # TODO: Return statement for checking on persistent and online class.
 
 
 

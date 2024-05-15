@@ -21,7 +21,7 @@ import os
 ### CHANGEABLE BEFORE RUN ###
 credential = 'credentials.toml'
 db_name = 'test.db'
-interval_in_min:str = 3
+interval_in_min:str = 13
 
 
 
